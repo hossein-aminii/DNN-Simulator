@@ -129,3 +129,40 @@ class CustomTrainer:
 
         with open("IMDB_LSTM_Base_Final_Training_History.json", "w") as jf:
             json.dump(self.history, jf)
+
+    def retrain(self, masks: list, inq_step: int):
+        print("INFO: Start retraining...")
+        masks = [tf.convert_to_tensor(m) for m in masks]
+        for epoch in range(self.epochs):
+            print(f"Epoch {epoch + 1}/{self.epochs}")
+
+            # Initialize Progbar
+            progbar = tf.keras.utils.Progbar(len(self.train_dataset))
+
+            # Initialize metrics
+            train_loss_metric = tf.keras.metrics.Mean()
+            train_accuracy_metric = tf.keras.metrics.CategoricalAccuracy()
+
+            # Training loop
+            for step, (x_batch_train, y_batch_train) in enumerate(self.train_dataset):
+                with tf.GradientTape() as tape:
+                    y_pred = self.model(x_batch_train, training=True)
+                    loss = self.loss_function(y_batch_train, y_pred)
+
+                gradients = tape.gradient(loss, self.model.trainable_variables)
+                masked_gradients = [grad * mask for grad, mask in zip(gradients, masks)]
+                self.optimizer.apply_gradients(zip(masked_gradients, self.model.trainable_variables))
+
+                # Update metrics
+                train_loss_metric.update_state(loss)
+                train_accuracy_metric.update_state(y_batch_train, y_pred)
+
+                # Update Progbar with current loss and accuracy
+                progbar.update(
+                    step + 1,
+                    [
+                        ("loss", train_loss_metric.result().numpy()),
+                        ("accuracy", train_accuracy_metric.result().numpy()),
+                    ],
+                )
+            self.model.save(f"IMDB_LSTM_INQ_step#{inq_step}_epoch#{epoch + 1}.h5")

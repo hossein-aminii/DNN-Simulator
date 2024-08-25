@@ -1,3 +1,6 @@
+import os
+
+
 class Config:
     """
     simulator parameter:
@@ -24,8 +27,10 @@ class Config:
             },
             {"type": "Dense", "units": 2, "use_bias": False, "activation": "softmax"},
         ],  # needed when initialize is True (crete new model)
-        # "filepath": "results\\models\\base_model\\IMDB_LSTM_Base_epoch#1.h5",  # nedded when initialize is False (load model from a file)
-        "filepath": f"results\\fixed-point-model-int{12}-frac{4}-format-twos_complement.h5",
+        "filepath": os.path.join(
+            "results", "models", "base_model", "IMDB_LSTM_Base_epoch#1.h5"
+        ),  # nedded when initialize is False (load model from a file)
+        # "filepath": os.path.join("results", "models", "PTQ", "8-bit", f"fixed-point-model-int{12}-frac{4}-format-twos_complement.h")
     }
 
     """
@@ -33,7 +38,7 @@ class Config:
         - must be a string
         - supported values: ["train", "inference", "quantization", "visualization", "test", "fault-injection", "FI-accuracy"]
     """
-    action = "fault-injection"
+    action = "quantization"
 
     """
     1- train
@@ -43,9 +48,8 @@ class Config:
 
     dataset_info = {
         "name": "IMDB",
-        "filepath": "datasets\\IMDB\\data\\IMDB-Dataset.csv",
-        "tokenizer_filepath": "results\\models\\base_model\\tokenizer.pickle",
-        # "tokenizer_filepath": "results\\models\\4\\tokenizer.pic",
+        "filepath": os.path.join("datasets", "IMDB", "data", "IMDB-Dataset.csv"),
+        "tokenizer_filepath": os.path.join("results", "models", "base_model", "tokenizer.pickle"),
     }
 
     train_params = {"epochs": 5}
@@ -53,14 +57,30 @@ class Config:
     visualizer = "weight_distribution"
     visualizer_config = {"important_layers": ["lstm", "dense"]}
 
-    quantizer = "fix-point-PT-quantizer"
+    """
+    options:
+        1- fix-point-PT-quantizer
+        2- QAT-INQ
+    """
+    quantizer = "QAT-INQ"
     quantizer_config = {
         "int_bits": 2,
         "fraction_bits": 2,
         "total_bits": 4,
         "important_tensors": {"lstm": [0, 1, 2], "dense": [0]},  # layer_name: indexes
         "format": "twos_complement",  # 1-twos_complement  2-sign_magnitude
-        "model_results_filepath": f"results\\fixed-point-model-int{2}-frac{2}-format-twos_complement.h5",
+        "model_results_filepath": os.path.join(
+            "results", f"fixed-point-model-int{2}-frac{2}-format-twos_complement.h5"
+        ),
+    }
+    INQ_quantizer_config = {
+        "accumulated_portion": [0.5, 0.75, 0.875, 1],
+        "indicator": 4,
+        "important_tensors": {
+            "lstm": [0, 1],
+            "dense": [0],
+        },
+        "tensor_mapping": {"lstm-0": 1, "lstm-1": 2, "dense-0": 4},
     }
 
     """
@@ -77,7 +97,9 @@ class Config:
         "fix_point_format": "twos_complement",  # 1-twos_complement  2-sign_magnitude
         "fault_injection_ratio": 1e-1,
         "mode": "single_bit_flip",
-        "model_results_directory": f"results\\fault_injection_ratio{1e-1}-int{12}-fraction{4}-format-twos_complement",
+        "model_results_directory": os.path.join(
+            "results", f"fault_injection_ratio{1e-1}-int{12}-fraction{4}-format-twos_complement"
+        ),
         "num_sample": 400,
         "accuracy_results_filename": "accuracy_results.json",
     }

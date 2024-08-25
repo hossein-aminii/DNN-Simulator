@@ -164,3 +164,4 @@ datasets/IMDB/data/IMDB-Dataset.csv
 results/excel_files
 results/models/old
 results/visualization
+results/BER
