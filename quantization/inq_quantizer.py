@@ -94,7 +94,9 @@ class INQ:
             print(f"INFO: Step {idx + 1}/{len(self.accumulated_portion)} in INQ process...")
             this_step_portion = new_portion - prev_portion if new_portion != 1 else 1
             model = self.apply_quantization(model=model, portion=this_step_portion)
-
-            trainer.epochs = 1
-            trainer.model = model
-            trainer.retrain(masks=self.masks, inq_step=idx + 1)
+            if new_portion == 1:
+                model.save(f"IMDB_LSTM_INQ_step#{idx + 1}_final.h5")
+            else:
+                trainer.epochs = 1
+                trainer.model = model
+                trainer.retrain(masks=self.masks, inq_step=idx + 1)

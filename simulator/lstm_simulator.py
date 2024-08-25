@@ -20,7 +20,7 @@ class LSTMSimulator:
 
     def inference(self):
         inference_obj = Inference(config=self.config)
-        inference_obj.inference()
+        # inference_obj.inference()
 
     def quantization(self):
         quantizer = QuantizationDispatcher(config=self.config).dispatch()
