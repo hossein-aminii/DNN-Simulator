@@ -2,7 +2,6 @@ from config import Config
 from model.utils import ModelLoader
 import numpy as np
 from train import CustomTrainer
-import tensorflow as tf
 
 
 class INQ:
@@ -94,6 +93,7 @@ class INQ:
             print(f"INFO: Step {idx + 1}/{len(self.accumulated_portion)} in INQ process...")
             this_step_portion = new_portion - prev_portion if new_portion != 1 else 1
             model = self.apply_quantization(model=model, portion=this_step_portion)
+
             if new_portion == 1:
                 model.save(f"IMDB_LSTM_INQ_step#{idx + 1}_final.h5")
             else:

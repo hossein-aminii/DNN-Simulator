@@ -27,10 +27,10 @@ class Config:
             },
             {"type": "Dense", "units": 2, "use_bias": False, "activation": "softmax"},
         ],  # needed when initialize is True (crete new model)
-        # "filepath": os.path.join(
-        #     "results", "models", "base_model", "IMDB_LSTM_Base_epoch#1.h5"
-        # ),  # nedded when initialize is False (load model from a file)
-        "filepath": os.path.join("results", "models", "QAT", "INQ", "IMDB_LSTM_INQ_step#4_epoch#1.h5"),
+        "filepath": os.path.join(
+            "results", "models", "base_model", "IMDB_LSTM_Base_epoch#1.h5"
+        ),  # nedded when initialize is False (load model from a file)
+        # "filepath": os.path.join("results", "models", "QAT", "INQ", "IMDB_LSTM_INQ_step#4_epoch#1.h5"),
         # "filepath": os.path.join("results", "models", "PTQ", "8-bit", f"fixed-point-model-int{12}-frac{4}-format-twos_complement.h")
     }
 
@@ -39,7 +39,7 @@ class Config:
         - must be a string
         - supported values: ["train", "inference", "quantization", "visualization", "test", "fault-injection", "FI-accuracy"]
     """
-    action = "inference"
+    action = "quantization"
 
     """
     1- train

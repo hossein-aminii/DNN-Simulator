@@ -13,37 +13,37 @@ class Inference:
         self.name = name
         self.config = config
         self.model = self.get_model(info=self.config.model_info)
-        # self.data_loader = self.get_data_loader(info=self.config.dataset_info)
+        self.data_loader = self.get_data_loader(info=self.config.dataset_info)
 
-        # self.train_dataset = self.data_loader.train_dataset
-        # self.validation_dataset = self.data_loader.validation_dataset
-        # self.inference_data = self.config.inference_data
+        self.train_dataset = self.data_loader.train_dataset
+        self.validation_dataset = self.data_loader.validation_dataset
+        self.inference_data = self.config.inference_data
 
-        # self.loss_function = self.get_loss_function()
-        # self.optimizer = self.get_optimizer()
-        weights = self.get_available_weights(indicator=4)
-        layers = {"lstm": [0, 1], "dense": [0]}
-        for layer in self.model.layers:
-            if layer.name not in layers.keys():
-                continue
-            indexes = layers[layer.name]
-            print(layer.name)
-            for idx, w in enumerate(layer.get_weights()):
-                if idx in indexes:
-                    flat_w = w.flatten()
-                    for value in flat_w:
-                        if value not in weights:
-                            print(f"ERROR: value {value} not in weights!")
+        self.loss_function = self.get_loss_function()
+        self.optimizer = self.get_optimizer()
+        # weights = self.get_available_weights(indicator=4)
+        # layers = {"lstm": [0, 1], "dense": [0]}
+        # for layer in self.model.layers:
+        #     if layer.name not in layers.keys():
+        #         continue
+        #     indexes = layers[layer.name]
+        #     print(layer.name)
+        #     for idx, w in enumerate(layer.get_weights()):
+        #         if idx in indexes:
+        #             flat_w = w.flatten()
+        #             for value in flat_w:
+        #                 if value not in weights:
+        #                     print(f"ERROR: value {value} not in weights!")
 
-    def get_available_weights(self, indicator: int):
-        weights = [0]
-        num_values = 2 ** (indicator - 1)
-        for idx in range(num_values - 1):
-            weights.append(2 ** -(idx + 1))
-            weights.append(-(2 ** -(idx + 1)))
-        weights = np.array(weights)
-        weights.sort()
-        return weights
+    # def get_available_weights(self, indicator: int):
+    #     weights = [0]
+    #     num_values = 2 ** (indicator - 1)
+    #     for idx in range(num_values - 1):
+    #         weights.append(2 ** -(idx + 1))
+    #         weights.append(-(2 ** -(idx + 1)))
+    #     weights = np.array(weights)
+    #     weights.sort()
+    #     return weights
 
     def get_loss_function(self):
         return tf.keras.losses.CategoricalCrossentropy()

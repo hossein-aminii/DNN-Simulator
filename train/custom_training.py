@@ -132,7 +132,7 @@ class CustomTrainer:
 
     def retrain(self, masks: list, inq_step: int):
         print("INFO: Start retraining...")
-        masks = [tf.convert_to_tensor(m) for m in masks]
+        masks_tf = [tf.convert_to_tensor(m) for m in masks]
         for epoch in range(self.epochs):
             print(f"Epoch {epoch + 1}/{self.epochs}")
 
@@ -150,7 +150,7 @@ class CustomTrainer:
                     loss = self.loss_function(y_batch_train, y_pred)
 
                 gradients = tape.gradient(loss, self.model.trainable_variables)
-                masked_gradients = [grad * mask for grad, mask in zip(gradients, masks)]
+                masked_gradients = [grad * mask for grad, mask in zip(gradients, masks_tf)]
                 self.optimizer.apply_gradients(zip(masked_gradients, self.model.trainable_variables))
 
                 # Update metrics
