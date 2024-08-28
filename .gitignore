@@ -165,6 +165,5 @@ results/excel_files
 results/models/old
 results/visualization
 results/BER
-results/models/QAT
 results/models/accuracies.xlsx
 results/models/accuracies.json

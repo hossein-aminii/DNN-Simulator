@@ -2,9 +2,7 @@ import tensorflow as tf
 from model import ModelDispatcher
 from config import Config
 from datasets import DataLoaderDispatcher
-import json
 import pickle
-import numpy as np
 
 
 class Inference:

@@ -55,6 +55,7 @@ class BaseFaultInjector:
         return binary_array
 
     def inject_faults(self, weights: np.ndarray):
+
         fixed_point_array = self.converter.array_to_fixed_point(array=weights, format_type=self.fix_point_format)
         faulty_array = np.copy(fixed_point_array)
 

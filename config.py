@@ -27,12 +27,12 @@ class Config:
             },
             {"type": "Dense", "units": 2, "use_bias": False, "activation": "softmax"},
         ],  # needed when initialize is True (crete new model)
-        "filepath": os.path.join(
-            "results", "models", "base_model", "IMDB_LSTM_Base_epoch#1.h5"
-        ),  # nedded when initialize is False (load model from a file)
+        # "filepath": os.path.join(
+        #     "results", "models", "base_model", "IMDB_LSTM_Base_epoch#1.h5"
+        # ),  # nedded when initialize is False (load model from a file)
         # "filepath": os.path.join("results", "models", "QAT", "INQ", "IMDB_LSTM_INQ_step#4_epoch#1.h5"),
         # "filepath": "IMDB_LSTM_INQ_step#3_epoch#1.h5",
-        # "filepath": os.path.join("results", "models", "PTQ", "8-bit", f"fixed-point-model-int{12}-frac{4}-format-twos_complement.h")
+        "filepath": os.path.join("results", "models", "QAT", "INQ", f"IMDB_LSTM_INQ_int2_fraction6.h5"),
     }
 
     """
@@ -40,7 +40,7 @@ class Config:
         - must be a string
         - supported values: ["train", "inference", "quantization", "visualization", "test", "fault-injection", "FI-accuracy"]
     """
-    action = "quantization"
+    action = "visualization"
 
     """
     1- train
@@ -95,13 +95,13 @@ class Config:
         1- basic_fault_injector
         2- accuracy_checker
     """
-    fault_injector = "accuracy_checker"
+    fault_injector = "basic_fault_injector"
     fault_injector_config = {
-        "int_bits": 12,
-        "fraction_bits": 4,
-        "total_bits": 16,
+        "int_bits": 2,
+        "fraction_bits": 6,
+        "total_bits": 8,
         "important_tensors": {"lstm": [0, 1, 2]},  # layer_name: indexes
-        "fix_point_format": "twos_complement",  # 1-twos_complement  2-sign_magnitude
+        "fix_point_format": "sign_magnitude",  # 1-twos_complement  2-sign_magnitude
         "fault_injection_ratio": 1e-1,
         "mode": "single_bit_flip",
         "model_results_directory": os.path.join(

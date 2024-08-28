@@ -1,53 +1,67 @@
-from model import ModelDispatcher
-import pickle
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-import numpy as np
+import serial
+import threading
+import time
 
 
-def get_model(info: dict):
-    model_type = info["type"]
-    dispatcher = ModelDispatcher(model_type=model_type)
-    model_utils = dispatcher.dispatch()
-    # --------------------------------------------------
-    initialize = info["initialize"]
-    if initialize:
-        layers_info = info["layers_info"]
-        return model_utils.crete_model(layers_info=layers_info)
-    else:
-        filepath = info["filepath"]
-        return model_utils.load_model(filepath=filepath)
+def send_data_through_uart(serial_port):
+    """
+    Send data through UART in a loop.
+
+    Args:
+    - serial_port (serial.Serial): The serial port object.
+    """
+    try:
+        while True:
+            data = input("")
+            serial_port.write(data.encode())
+            # print(f"Data sent: {data}")
+            time.sleep(1)  # Wait for 1 second before sending the next data
+    except serial.SerialException as e:
+        print(f"Error sending data: {e}")
 
 
-def load_tokenizer(path: str):
-    with open(path, "rb") as handle:
-        tokenizer = pickle.load(handle)
-    return tokenizer
+def receive_data_from_uart(serial_port):
+    """
+    Receive data from UART in a loop.
+
+    Args:
+    - serial_port (serial.Serial): The serial port object.
+    """
+    try:
+        while True:
+            if serial_port.in_waiting > 0:
+                data = serial_port.read(serial_port.in_waiting).decode()
+                print(f"Data received from Zynq: {data}")
+            time.sleep(0.1)  # Check for received data every 100 ms
+    except serial.SerialException as e:
+        print(f"Error receiving data: {e}")
 
 
-model_info = {
-    "type": "LSTM",
-    "initialize": False,
-    "filepath": "results\\models\\1_1\\IMDB_LSTM_Base_epoch#1.h5",  # nedded when initialize is False (load model from a file)
-}
+def main():
+    # Replace 'COM3' with your UART port (e.g., '/dev/ttyUSB0' for Linux)
+    uart_port = "COM7"
+    baud_rate = 115200  # Set your baud rate here
 
-model = get_model(info=model_info)
-print(model.summary())
+    try:
+        # Open the serial port
+        with serial.Serial(uart_port, baud_rate, timeout=1) as serial_port:
+            print(f"Connected to {uart_port} at {baud_rate} baud.")
+
+            # Create threads for sending and receiving data
+            send_thread = threading.Thread(target=send_data_through_uart, args=(serial_port,))
+            receive_thread = threading.Thread(target=receive_data_from_uart, args=(serial_port,))
+
+            # Start the threads
+            send_thread.start()
+            receive_thread.start()
+
+            # Join the threads to the main thread
+            send_thread.join()
+            receive_thread.join()
+
+    except serial.SerialException as e:
+        print(f"Error opening serial port: {e}")
 
 
-def preprocess_single_sentence(sentence, tokenizer, max_sequence_length):
-    sequence = tokenizer.texts_to_sequences([sentence])
-    padded_sequence = pad_sequences(sequence, maxlen=max_sequence_length)
-    return padded_sequence
-
-
-tokenizer_path = "results/models/1_1/tokenizer.pickle"
-tokenizer = load_tokenizer(path=tokenizer_path)
-
-test_sentence = "this id a Great movie!"
-# test_sentence = "It is not good and not bad movie, but it does not worth to watch"
-X_test = preprocess_single_sentence(test_sentence, tokenizer, max_sequence_length=250)
-
-predictions = model.predict(X_test)
-predicted_class = np.argmax(predictions, axis=1)
-
-print("Predicted class:", predicted_class)
+if __name__ == "__main__":
+    main()
