@@ -3,24 +3,29 @@ from model import ModelDispatcher
 from config import Config
 from datasets import DataLoaderDispatcher
 import json
+import numpy as np
 
 
 class CustomTrainer:
 
-    def __init__(self, config: Config, name="A module to train a model using custom training loop") -> None:
+    def __init__(
+        self,
+        config: Config,
+        name="A module to train a model using custom training loop",
+    ) -> None:
         self.name = name
         self.config = config
+
         self.model = self.get_model(info=self.config.model_info)
+
         self.data_loader = self.get_data_loader(info=self.config.dataset_info)
         self.train_params: dict = self.config.train_params
-
         self.train_dataset = self.data_loader.train_dataset
         self.validation_dataset = self.data_loader.validation_dataset
+        self.epochs = self.train_params["epochs"]
 
         self.loss_function = self.get_loss_function()
         self.optimizer = self.get_optimizer()
-
-        self.epochs = self.train_params["epochs"]
 
         self.history = {
             "train": {"per_step": {"loss": [], "accuracy": []}, "per_epoch": {"loss": [], "accuracy": []}},
@@ -130,9 +135,10 @@ class CustomTrainer:
         with open("IMDB_LSTM_Base_Final_Training_History.json", "w") as jf:
             json.dump(self.history, jf)
 
-    def retrain(self, masks: list, inq_step: int):
+    def retrain(self, model, masks: list, inq_step: int):
         print("INFO: Start retraining...")
         masks_tf = [tf.convert_to_tensor(m) for m in masks]
+        optimizer = self.get_optimizer()
         for epoch in range(self.epochs):
             print(f"Epoch {epoch + 1}/{self.epochs}")
 
@@ -146,12 +152,13 @@ class CustomTrainer:
             # Training loop
             for step, (x_batch_train, y_batch_train) in enumerate(self.train_dataset):
                 with tf.GradientTape() as tape:
-                    y_pred = self.model(x_batch_train, training=True)
+                    y_pred = model(x_batch_train, training=True)
                     loss = self.loss_function(y_batch_train, y_pred)
 
-                gradients = tape.gradient(loss, self.model.trainable_variables)
+                gradients = tape.gradient(loss, model.trainable_variables)
                 masked_gradients = [grad * mask for grad, mask in zip(gradients, masks_tf)]
-                self.optimizer.apply_gradients(zip(masked_gradients, self.model.trainable_variables))
+
+                optimizer.apply_gradients(zip(masked_gradients, model.trainable_variables))
 
                 # Update metrics
                 train_loss_metric.update_state(loss)
@@ -165,4 +172,6 @@ class CustomTrainer:
                         ("accuracy", train_accuracy_metric.result().numpy()),
                     ],
                 )
-            self.model.save(f"IMDB_LSTM_INQ_step#{inq_step}_epoch#{epoch + 1}.h5")
+                break
+            model.save(f"IMDB_LSTM_INQ_step#{inq_step}_epoch#{epoch + 1}.h5")
+        return model

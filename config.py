@@ -31,6 +31,7 @@ class Config:
             "results", "models", "base_model", "IMDB_LSTM_Base_epoch#1.h5"
         ),  # nedded when initialize is False (load model from a file)
         # "filepath": os.path.join("results", "models", "QAT", "INQ", "IMDB_LSTM_INQ_step#4_epoch#1.h5"),
+        # "filepath": "IMDB_LSTM_INQ_step#3_epoch#1.h5",
         # "filepath": os.path.join("results", "models", "PTQ", "8-bit", f"fixed-point-model-int{12}-frac{4}-format-twos_complement.h")
     }
 
@@ -55,8 +56,13 @@ class Config:
 
     train_params = {"epochs": 5}
 
-    visualizer = "weight_distribution"
-    visualizer_config = {"important_layers": ["lstm", "dense"]}
+    """
+    options:
+        1- weight_distribution
+        2- BER
+    """
+    visualizer = "BER"
+    visualizer_config = {"important_layers": ["lstm", "dense"], "filepath": os.path.join("results", "BER", "BER.json")}
 
     """
     options:
@@ -76,7 +82,7 @@ class Config:
     }
     INQ_quantizer_config = {
         "accumulated_portion": [0.5, 0.75, 0.875, 1],
-        "indicator": 4,
+        "fraction_bits": 6,
         "important_tensors": {
             "lstm": [0, 1],
             "dense": [0],

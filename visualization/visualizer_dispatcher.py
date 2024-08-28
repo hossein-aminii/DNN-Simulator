@@ -1,5 +1,6 @@
 from config import Config
 from .weight_distribution import WeightDistributionVisualizer
+from .bit_error_rate import BERVisualizer
 
 
 class VisualizerDispatcher:
@@ -12,6 +13,8 @@ class VisualizerDispatcher:
         if self.config.visualizer == "weight_distribution":
             print(f"INFO: Selected visualizer is {self.config.visualizer}")
             return WeightDistributionVisualizer(config=self.config)
+        elif self.config.visualizer == "BER":
+            return BERVisualizer(config=self.config)
         else:
             raise Exception(
                 f"ERROR: Selected visualizer is invalid. There is no visualizer with this tag: {self.config.visualizer}"

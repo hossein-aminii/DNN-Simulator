@@ -12,18 +12,17 @@ class INQ:
         self.config = config
         self.inq_config: dict = self.config.INQ_quantizer_config
         self.accumulated_portion: list = self.inq_config["accumulated_portion"]
-        self.inq_indicator: int = self.inq_config["indicator"]
+        self.fraction_bits: int = self.inq_config["fraction_bits"]
         self.tensors: dict = self.inq_config["important_tensors"]
         self.tensor_mapping: dict = self.inq_config["tensor_mapping"]
         self.masks = []
 
-        self.available_weights: np.ndarray = self.get_available_weights(indicator=self.inq_indicator)
-        print(self.available_weights)
+        self.available_weights: np.ndarray = self.get_available_weights(fraction_bits=self.fraction_bits)
+        print(f"INFO: available weights in INQ: {self.available_weights}")
 
-    def get_available_weights(self, indicator: int):
-        weights = [0]
-        num_values = 2 ** (indicator - 1)
-        for idx in range(num_values - 1):
+    def get_available_weights(self, fraction_bits: int):
+        weights = [-1, 0, 1]
+        for idx in range(fraction_bits):
             weights.append(2 ** -(idx + 1))
             weights.append(-(2 ** -(idx + 1)))
         weights = np.array(weights)
@@ -84,6 +83,25 @@ class INQ:
     def initialize_masks(self, model):
         self.masks = [np.ones_like(var) for var in model.trainable_variables]
 
+    def test_model(self, model):
+        for layer in model.layers:
+            if layer.name not in list(self.tensors.keys()):
+                continue
+            indexes = self.tensors[layer.name]
+            for idx, w in enumerate(layer.get_weights()):
+                if idx in indexes:
+                    num_error = 0
+                    no_error = 0
+                    flat_w = w.flatten()
+                    for value in flat_w:
+                        if value not in self.available_weights:
+                            print(f"ERROR: value {value} not in list!")
+                            num_error += 1
+                        else:
+                            no_error += 1
+                    print(f"num errors: {num_error}")
+                    print(f"no error: {no_error}")
+
     def run(self):
         prev_portion = 0
         model = self.model_loader.load()
@@ -93,10 +111,6 @@ class INQ:
             print(f"INFO: Step {idx + 1}/{len(self.accumulated_portion)} in INQ process...")
             this_step_portion = new_portion - prev_portion if new_portion != 1 else 1
             model = self.apply_quantization(model=model, portion=this_step_portion)
-
-            if new_portion == 1:
-                model.save(f"IMDB_LSTM_INQ_step#{idx + 1}_final.h5")
-            else:
-                trainer.epochs = 1
-                trainer.model = model
-                trainer.retrain(masks=self.masks, inq_step=idx + 1)
+            prev_portion = new_portion
+            trainer.epochs = 1
+            model = trainer.retrain(model=model, masks=self.masks, inq_step=idx + 1)
