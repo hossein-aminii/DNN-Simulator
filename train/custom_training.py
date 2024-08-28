@@ -172,6 +172,5 @@ class CustomTrainer:
                         ("accuracy", train_accuracy_metric.result().numpy()),
                     ],
                 )
-                break
             model.save(f"IMDB_LSTM_INQ_step#{inq_step}_epoch#{epoch + 1}.h5")
         return model
