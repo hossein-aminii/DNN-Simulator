@@ -32,7 +32,7 @@ class Config:
         # ),  # nedded when initialize is False (load model from a file)
         # "filepath": os.path.join("results", "models", "QAT", "INQ", "IMDB_LSTM_INQ_step#4_epoch#1.h5"),
         # "filepath": "IMDB_LSTM_INQ_step#3_epoch#1.h5",
-        "filepath": os.path.join("results", "models", "QAT", "INQ", f"IMDB_LSTM_INQ_int2_fraction6.h5"),
+        "filepath": os.path.join("results", "models", "QAT", "INQ", f"IMDB_LSTM_INQ_int{1}_fraction{7}.h5"),
     }
 
     """
@@ -40,7 +40,7 @@ class Config:
         - must be a string
         - supported values: ["train", "inference", "quantization", "visualization", "test", "fault-injection", "FI-accuracy"]
     """
-    action = "visualization"
+    action = "fault-injection"
 
     """
     1- train
@@ -97,13 +97,16 @@ class Config:
     """
     fault_injector = "basic_fault_injector"
     fault_injector_config = {
+        "injection_mode": "specific_bit",  # 1-normal  2-map_to_zero  3-map_to_less  4-specific_bit
+        "specific_bit_index": 4,
+        "log": False,
+        "injection_type": "single_bit_flip",
         "int_bits": 2,
         "fraction_bits": 6,
         "total_bits": 8,
         "important_tensors": {"lstm": [0, 1, 2]},  # layer_name: indexes
         "fix_point_format": "sign_magnitude",  # 1-twos_complement  2-sign_magnitude
-        "fault_injection_ratio": 1e-1,
-        "mode": "single_bit_flip",
+        "fault_injection_ratio": 1e-3,
         "model_results_directory": os.path.join(
             "results", f"fault_injection_ratio{1e-1}-int{12}-fraction{4}-format-twos_complement"
         ),

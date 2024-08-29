@@ -17,7 +17,10 @@ class FaultInjector:
         self.total_bits = self.int_bits + self.fraction_bits
         self.fault_injection_ratio = self.fault_injector_config["fault_injection_ratio"]
         self.fix_point_format = self.fault_injector_config["fix_point_format"]
-        self.mode = self.fault_injector_config["mode"]
+        self.injection_type = self.fault_injector_config["injection_type"]
+        self.injection_mode = self.fault_injector_config["injection_mode"]
+        self.specific_bit_index = self.fault_injector_config.get("specific_bit_index", 1000)
+        self.log = self.fault_injector_config.get("log", False)
         self.important_tensors = self.fault_injector_config["important_tensors"]
         self.results_directory = self.fault_injector_config["model_results_directory"]
         self.num_sample = self.fault_injector_config["num_sample"]
@@ -34,7 +37,10 @@ class FaultInjector:
             int_bits=self.int_bits,
             fraction_bits=self.fraction_bits,
             fix_point_format=self.fix_point_format,
-            mode=self.mode,
+            injection_type=self.injection_type,
+            injection_mode=self.injection_mode,
+            specific_bit_index=self.specific_bit_index,
+            log=self.log,
         )
         for sample_idx in range(self.num_sample):
             model = self.model_loader.load()
