@@ -38,7 +38,7 @@ class Config:
     """
     action parameter:
         - must be a string
-        - supported values: ["train", "inference", "quantization", "visualization", "test", "fault-injection", "FI-accuracy"]
+        - supported values: ["train", "inference", "quantization", "visualization", "test", "fault-injection", "manual-inference"]
     """
     action = "fault-injection"
 
@@ -97,8 +97,8 @@ class Config:
     """
     fault_injector = "basic_fault_injector"
     fault_injector_config = {
-        "injection_mode": "specific_bit",  # 1-normal  2-map_to_zero  3-map_to_less  4-specific_bit
-        "specific_bit_index": 4,
+        "injection_mode": "normal",  # 1-normal  2-map_to_zero  3-map_to_less  4-specific_bit
+        "specific_bit_index": 0,
         "log": False,
         "injection_type": "single_bit_flip",
         "int_bits": 2,
@@ -106,10 +106,19 @@ class Config:
         "total_bits": 8,
         "important_tensors": {"lstm": [0, 1, 2]},  # layer_name: indexes
         "fix_point_format": "sign_magnitude",  # 1-twos_complement  2-sign_magnitude
-        "fault_injection_ratio": 1e-3,
+        "fault_injection_ratio": 1e-1,
         "model_results_directory": os.path.join(
-            "results", f"fault_injection_ratio{1e-1}-int{12}-fraction{4}-format-twos_complement"
+            "results", f"INQ-{2}-{6}_fault_injection_ratio{1e-1}-int{2}-fraction{6}-format-sign_magnitude"
         ),
         "num_sample": 400,
-        "accuracy_results_filename": "accuracy_results.json",
+        "accuracy_results_filename": f"accuracy_results_int{2}_frac{6}_ER{1e-1}.json",
+        "remove_generated_files": True,
+        "sample_index_range": (0, 10),
+    }
+
+    manual_inference_config = {
+        "target_layer": "lstm",
+        "prev_target_layer": "spatial_dropout1d",
+        "weights_info": {0: "kernel", 1: "recurrent_kernel"},
+        "bias_info": {2: "biases"},
     }

@@ -6,6 +6,7 @@ from quantization.quantization_dispatcher import QuantizationDispatcher
 from model.utils import ModelLoader
 import numpy as np
 from fault_injection.fault_injection_dispatcher import FaultInjectionDispatcher
+from inference.manual_inference import ManualInference
 
 
 class LSTMSimulator:
@@ -45,6 +46,10 @@ class LSTMSimulator:
         fault_injector = FaultInjectionDispatcher(config=self.config).dispatch()
         fault_injector.run()
 
+    def manual_inference(self):
+        inference_engine = ManualInference(config=self.config)
+        inference_engine.run()
+
     def run(self):
         print("INFO: start running LSTM simulator...")
         if self.config.action == "train":
@@ -59,6 +64,8 @@ class LSTMSimulator:
             self.test()
         elif self.config.action == "fault-injection":
             self.fault_injection()
+        elif self.config.action == "manual-inference":
+            self.manual_inference()
         else:
             raise Exception(
                 f"ERROR: Invalid simulator action. The action {self.config.action} not supported or is invalid."

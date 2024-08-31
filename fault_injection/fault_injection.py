@@ -24,6 +24,7 @@ class FaultInjector:
         self.important_tensors = self.fault_injector_config["important_tensors"]
         self.results_directory = self.fault_injector_config["model_results_directory"]
         self.num_sample = self.fault_injector_config["num_sample"]
+        self.sample_index_range = self.fault_injector_config["sample_index_range"]
         if not os.path.exists(self.results_directory):
             os.mkdir(self.results_directory)
 
@@ -43,22 +44,23 @@ class FaultInjector:
             log=self.log,
         )
         for sample_idx in range(self.num_sample):
-            model = self.model_loader.load()
-            print(f"INFO: fault injection in step {sample_idx + 1}/{self.num_sample}...")
-            for layer in model.layers:
-                if layer.name not in list(self.important_tensors.keys()):
-                    continue
-                # print(f"INFO: injecting faults in weights of layer {layer.name}...")
-                weights = layer.get_weights()
-                indexes = self.important_tensors[layer.name]
-                new_layer_weights = []
-                for idx, w in enumerate(weights):
-                    if idx in indexes and len(w.shape) > 1:
-                        faulty_w = fault_injector.inject_faults(weights=w)
-                        new_layer_weights.append(faulty_w)
-                    else:
-                        new_layer_weights.append(w)
-                layer.set_weights(new_layer_weights)
-            model_path = os.path.join(self.results_directory, f"faulty_model#{sample_idx + 1}.h5")
-            model.save(model_path)
-            # print(f"INFO: model with fixed-point weights saved in {self.results_file_path}")
+            if self.sample_index_range[0] <= sample_idx <= self.sample_index_range[1]:
+                model = self.model_loader.load()
+                print(f"INFO: fault injection in step {sample_idx + 1}/{self.num_sample}...")
+                for layer in model.layers:
+                    if layer.name not in list(self.important_tensors.keys()):
+                        continue
+                    # print(f"INFO: injecting faults in weights of layer {layer.name}...")
+                    weights = layer.get_weights()
+                    indexes = self.important_tensors[layer.name]
+                    new_layer_weights = []
+                    for idx, w in enumerate(weights):
+                        if idx in indexes and len(w.shape) > 1:
+                            faulty_w = fault_injector.inject_faults(weights=w)
+                            new_layer_weights.append(faulty_w)
+                        else:
+                            new_layer_weights.append(w)
+                    layer.set_weights(new_layer_weights)
+                model_path = os.path.join(self.results_directory, f"faulty_model#{sample_idx + 1}.h5")
+                model.save(model_path)
+                # print(f"INFO: model with fixed-point weights saved in {self.results_file_path}")

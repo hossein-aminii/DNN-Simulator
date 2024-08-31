@@ -18,6 +18,7 @@ class AccuracyChecker:
         self.results_directory = self.fault_injector_config["model_results_directory"]
         if not os.path.exists(self.results_directory):
             os.mkdir(self.results_directory)
+        self.remove_files = self.fault_injector_config["remove_generated_files"]
 
     def get_model_paths(self, directory: str):
         return [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith(".h5")]
@@ -45,5 +46,9 @@ class AccuracyChecker:
             results["accuracy_details"] = accuracy_details
             results["mean_loss"] = float(np.mean(accuracy_details["loss"]))
             results["mean_accuracy"] = float(np.mean(accuracy_details["accuracy"]))
+            results["num_files_checked"] = idx + 1
             self.save_accuracy_results(results=results)
             model = None
+        if self.remove_files:
+            for path in model_paths:
+                os.remove(path=path)
