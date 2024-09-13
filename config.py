@@ -30,9 +30,9 @@ class Config:
         # "filepath": os.path.join(
         #     "results", "models", "base_model", "IMDB_LSTM_Base_epoch#1.h5"
         # ),  # nedded when initialize is False (load model from a file)
-        # "filepath": os.path.join("results", "models", "QAT", "INQ", "IMDB_LSTM_INQ_step#4_epoch#1.h5"),
+        # "filepath": os.path.join("results", "models", "base_model", "IMDB_LSTM_Base_epoch#1.h5"),
         # "filepath": "IMDB_LSTM_INQ_step#3_epoch#1.h5",
-        "filepath": os.path.join("results", "models", "QAT", "INQ", f"IMDB_LSTM_INQ_int{1}_fraction{7}.h5"),
+        "filepath": os.path.join("results", "models", "QAT", "INQ", f"IMDB_LSTM_INQ_int{2}_fraction{6}.h5"),
     }
 
     """
@@ -40,7 +40,7 @@ class Config:
         - must be a string
         - supported values: ["train", "inference", "quantization", "visualization", "test", "fault-injection", "manual-inference"]
     """
-    action = "fault-injection"
+    action = "visualization"
 
     """
     1- train
@@ -60,9 +60,13 @@ class Config:
     options:
         1- weight_distribution
         2- BER
+        3- bar_chart
     """
     visualizer = "BER"
-    visualizer_config = {"important_layers": ["lstm", "dense"], "filepath": os.path.join("results", "BER", "BER.json")}
+    visualizer_config = {
+        "important_layers": ["lstm", "dense"],
+        "filepath": os.path.join("results", "BER", "BER.json"),
+    }
 
     """
     options:

@@ -46,6 +46,8 @@ class WeightDistributionVisualizer:
             tensor_name = self.get_tensor_name(tensor_full_name=w.name)
             print(f"Plotting weights disctibution of {layer_name}/{tensor_name}")
             weights_array: np.ndarray = w.numpy()
+            print(f"INFO: Minimum weight value in layer {layer_name}: {np.min(weights_array)}")
+            print(f"INFO: Maximum weight value in layer {layer_name}: {np.max(weights_array)}")
             visualizer = DistributionVisualizer(
                 weights=weights_array, title=f"Weight Distribution for {layer_name}/{tensor_name}"
             )

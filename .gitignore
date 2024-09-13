@@ -167,3 +167,4 @@ results/visualization
 results/BER
 results/models/accuracies.xlsx
 results/models/accuracies.json
+results/hardware

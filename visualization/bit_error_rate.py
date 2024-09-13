@@ -23,7 +23,7 @@ class BERVisualizer:
         x_title = self.data.pop("x-title")
         y_title = self.data.pop("y-title")
         df = pd.DataFrame(self.data, index=ber)
-        ax = df.plot(kind="line", logx=True)
+        ax = df.plot(kind="line", logx=True, linewidth=4)
         ax.set_xlabel(x_title)
         ax.set_ylabel(y_title)
         plt.show()
